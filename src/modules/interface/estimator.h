@@ -28,7 +28,7 @@
 
 #include "stabilizer_types.h"
 
-typedef enum {
+typedef enum { // enum that lists estimator types (any, complementary, kalman)
   anyEstimator = 0,
   complementaryEstimator,
   kalmanEstimator,
