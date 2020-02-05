@@ -174,78 +174,127 @@ void stateEstimator(state_t *state, sensorData_t *sensors, control_t *control, c
   estimatorFunctions[currentEstimator].update(state, sensors, control, tick); // Call primary estimator function
 }
 
+// Function: stateEstimatorGetName
+// Definition: Returns name of current estimator
+// Parameters: none
+// Return Type: const char*
+
 const char* stateEstimatorGetName() {
-  return estimatorFunctions[currentEstimator].name;
+  return estimatorFunctions[currentEstimator].name; // Returns name
 }
 
+// Function: estimatorEnqueueTDOA (TDOA = time difference of arrivals, used for positioning)
+// Definition: Begins TDOA queue (This has to do with the FreeRTOS code, not exactly sure what's going on here yet -- not implemented for complementary filter)
+// Parameters: const tdoaMeasurement_t *uwb - struct reflecting tdoa measurements (stabilizer_types.h)
+// Return Type: bool
 
 bool estimatorEnqueueTDOA(const tdoaMeasurement_t *uwb) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueueTDOA) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueueTDOA(uwb);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueueTDOA) { // If implemented
+    return estimatorFunctions[currentEstimator].estimatorEnqueueTDOA(uwb); // Call associated enqueue tdoa function
   }
 
   return false;
 }
+
+// Function: estimatorEnqueueYawError
+// Definition: Begins yaw error queue
+// Parameters: const yawErrorMeasurement_t *error - struct reflecting yaw error measurements (stabilizer_types.h)
+// Return Type: bool
 
 bool estimatorEnqueueYawError(const yawErrorMeasurement_t* error) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueueYawError) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueueYawError(error);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueueYawError) { // If implemented
+    return estimatorFunctions[currentEstimator].estimatorEnqueueYawError(error); // Call associated enqueue yaw error function
   }
 
   return false;
 }
+
+// Function: estimatorEnqueuePosition
+// Definition: Begins position queue
+// Parameters: const positionMeasurement_t *pos - struct reflecting position measurements (stabilizer_types.h)
+// Return Type: bool
 
 bool estimatorEnqueuePosition(const positionMeasurement_t *pos) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueuePosition) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueuePosition(pos);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueuePosition) { // If implemented
+    return estimatorFunctions[currentEstimator].estimatorEnqueuePosition(pos); // Call associated enqueue position function
   }
 
   return false;
 }
+
+// Function: estimatorEnqueuePose
+// Definition: Begins pose (what is pose??) queue
+// Parameters: const poseMeasurement_t *pose - struct reflecting pose measurements (stabilizer_types.h)
+// Return Type: bool
 
 bool estimatorEnqueuePose(const poseMeasurement_t *pose) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueuePose) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueuePose(pose);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueuePose) { // If implemented
+    return estimatorFunctions[currentEstimator].estimatorEnqueuePose(pose); // Call associated enqueue pose function
   }
 
   return false;
 }
+
+// Function: estimatorEnqueueDistance
+// Definition: Begins distance queue
+// Parameters: const distanceMeasurement_t *dist - struct reflecting distance measurements (stabilizer_types.h)
+// Return Type: bool
 
 bool estimatorEnqueueDistance(const distanceMeasurement_t *dist) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueueDistance) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueueDistance(dist);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueueDistance) { // If implemented
+    return estimatorFunctions[currentEstimator].estimatorEnqueueDistance(dist); // Call associated enqueue distance function
   }
 
   return false;
 }
+
+// Function: estimatorEnqueueTOF (TOF = time of flight)
+// Definition: Begins TOF queue
+// Parameters: const tofMeasurement_t *tof - struct reflecting tof measurements (stabilizer_types.h)
+// Return Type: bool
 
 bool estimatorEnqueueTOF(const tofMeasurement_t *tof) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueueTOF) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueueTOF(tof);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueueTOF) { // If implemented
+    return estimatorFunctions[currentEstimator].estimatorEnqueueTOF(tof); // Call associated enqueue tof function
   }
 
   return false;
 }
+
+// Function: estimatorEnqueueAbsoluteHeight
+// Definition: Begins height queue
+// Parameters: const heightMeasurement_t *height - struct reflecting absolute height measurements (stabilizer_types.h)
+// Return Type: bool
 
 bool estimatorEnqueueAbsoluteHeight(const heightMeasurement_t *height) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueueAbsoluteHeight) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueueAbsoluteHeight(height);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueueAbsoluteHeight) { // If implemented
+    return estimatorFunctions[currentEstimator].estimatorEnqueueAbsoluteHeight(height); // Call associated enqueue height function
   }
 
   return false;
 }
+
+// Function: estimatorEnqueueFlow
+// Definition: Begins flow queue
+// Parameters: const flowMeasurement_t *flow - struct reflecting flow measurements (From the flow deck??) (stabilizer_types.h)
+// Return Type: bool
 
 bool estimatorEnqueueFlow(const flowMeasurement_t *flow) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueueFlow) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueueFlow(flow);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueueFlow) { // If implemented 
+    return estimatorFunctions[currentEstimator].estimatorEnqueueFlow(flow); // Call associated enqueue flow function
   }
 
   return false;
 }
 
+// Function: estimatorEnqueueSweepAngles
+// Definition: Begins sweep angles queue
+// Parameters: const sweepAngleMeasurement_t *angles - struct reflecting sweep angle measurements (Not entirely sure what this is for) (stabilizer_types.h)
+// Return Type: bool
+
 bool estimatorEnqueueSweepAngles(const sweepAngleMeasurement_t *angles) {
-  if (estimatorFunctions[currentEstimator].estimatorEnqueueSweepAngles) {
-    return estimatorFunctions[currentEstimator].estimatorEnqueueSweepAngles(angles);
+  if (estimatorFunctions[currentEstimator].estimatorEnqueueSweepAngles) { // If implemented
+    return estimatorFunctions[currentEstimator].estimatorEnqueueSweepAngles(angles); // Call associated enqueue sweep angles function
   }
 
   return false;
