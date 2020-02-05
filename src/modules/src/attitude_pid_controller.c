@@ -22,9 +22,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  * attitude_pid_controller.c: Attitude controler using PID correctors
- ****************************************************************************
- *THIS IS A TEST COMMENT TO SEE IF GIT IS WORKING PROPERLY -- ADDED BY AIDAN
- ****************************************************************************
  */
 #include <stdbool.h>
 
