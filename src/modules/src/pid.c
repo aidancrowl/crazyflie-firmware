@@ -30,7 +30,8 @@
 #include <math.h>
 #include <float.h>
 
-//test
+//pid control calculates an error value between a desired point and a measured value
+//initialize all variables needed for pid control
 void pidInit(PidObject* pid, const float desired, const float kp,
              const float ki, const float kd, const float dt,
              const float samplingRate, const float cutoffFreq,
@@ -38,47 +39,51 @@ void pidInit(PidObject* pid, const float desired, const float kp,
 {
   pid->error         = 0;
   pid->prevError     = 0;
-  pid->integ         = 0;
-  pid->deriv         = 0;
-  pid->desired       = desired;
-  pid->kp            = kp;
-  pid->ki            = ki;
-  pid->kd            = kd;
-  pid->iLimit        = DEFAULT_PID_INTEGRATION_LIMIT;
-  pid->outputLimit   = DEFAULT_PID_OUTPUT_LIMIT;
+  pid->integ         = 0; //in pid integral accounts for previous error values
+  pid->deriv         = 0; //"anticipatory control" based on the error's current rate of change
+  pid->desired       = desired; //desired point
+  pid->kp            = kp;      //position gain
+  pid->ki            = ki;      //integral gain
+  pid->kd            = kd;      //derivative gain
+  pid->iLimit        = DEFAULT_PID_INTEGRATION_LIMIT; //set in pid.h to 5000
+  pid->outputLimit   = DEFAULT_PID_OUTPUT_LIMIT;       //set in pid.h to 0 which means no limit
   pid->dt            = dt;
-  pid->enableDFilter = enableDFilter;
-  if (pid->enableDFilter)
+  pid->enableDFilter = enableDFilter;  //filter for derivative
+  if (pid->enableDFilter) //pid controllers use LPF to limit HF gain & noise
   {
-    lpf2pInit(&pid->dFilter, samplingRate, cutoffFreq);
+    lpf2pInit(&pid->dFilter, samplingRate, cutoffFreq); //in file filter.c, sets cutoff frequency
   }
 }
 
+//update pid values based on measured value
 float pidUpdate(PidObject* pid, const float measured, const bool updateError)
 {
     float output = 0.0f;
 
     if (updateError)
     {
-        pid->error = pid->desired - measured;
+        pid->error = pid->desired - measured; //new error = desired - measured
     }
 
-    pid->outP = pid->kp * pid->error;
+    pid->outP = pid->kp * pid->error; //proportional output = kp * error
     output += pid->outP;
 
-    float deriv = (pid->error - pid->prevError) / pid->dt;
+    //set derivative by checking if we want to filter it and make sure it is a #
+    float deriv = (pid->error - pid->prevError) / pid->dt; //derivative = current error - previous error /change in time (slope of error over time)
     if (pid->enableDFilter)
     {
-      pid->deriv = lpf2pApply(&pid->dFilter, deriv);
-    } else {
+      pid->deriv = lpf2pApply(&pid->dFilter, deriv); //calculates a delay element & checks to make sure it is finite so bad values don't go through filter
+    } else {                                         //if yes sets delay element to derivative and returns it
       pid->deriv = deriv;
     }
     if (isnan(pid->deriv)) {
       pid->deriv = 0;
     }
-    pid->outD = pid->kd * pid->deriv;
+    pid->outD = pid->kd * pid->deriv;  //derivative output = kd * derivative
     output += pid->outD;
 
+
+    //compute integral value (proportional to error and duration of error)
     pid->integ += pid->error * pid->dt;
 
     // Constrain the integral (unless the iLimit is zero)
