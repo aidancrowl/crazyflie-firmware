@@ -68,9 +68,21 @@ bool estimatorComplementaryTest(void)
   return pass;
 }
 
+// Function: estimatorComplementary
+// Definition: Acquire sensor data and update relevant state variables
+// Parameters: 
+//		state_t *state - struct reflecting current state of UAV (stabilizer_types.h)
+//		sensorDatat_t *sensorData - struct reflecting current sensor measurements (stabilizer_types.h)
+//		control_t *control - struct reflecting current positional control inputs (roll, pitch, yaw, thrust) (stabilizer_types.h)
+//		const uint32_t tick - unsigned int 
+// Return Type: void
+
 void estimatorComplementary(state_t *state, sensorData_t *sensorData, control_t *control, const uint32_t tick)
 {
-  sensorsAcquire(sensorData, tick); // Read sensors at full rate (1000Hz)
+  // Call Hierarchy:
+  //	here (sensorsAcquire) --> sensorsAcquire definition (sensors.c) --> specific sensor ("specific_sensor".c) --> read component (gyro, acc, mag, baro) (sensors.c) --> read specific component ("specific_sensor".c) --> queue receive (FreeRTOS)
+  
+	sensorsAcquire(sensorData, tick); // Read sensors at full rate (1000Hz)
   if (RATE_DO_EXECUTE(ATTITUDE_UPDATE_RATE, tick)) {
     sensfusion6UpdateQ(sensorData->gyro.x, sensorData->gyro.y, sensorData->gyro.z,
                        sensorData->acc.x, sensorData->acc.y, sensorData->acc.z,
@@ -101,6 +113,15 @@ void estimatorComplementary(state_t *state, sensorData_t *sensorData, control_t 
     positionEstimate(state, sensorData, &tofMeasurement, POS_UPDATE_DT, tick);
   }
 }
+
+// Function: latestTofMeasurement
+// Definition: Acquire sensor data and update relevant state variables
+// Parameters: 
+//		tofMeasurement_t *tofMeasurement - struct reflecting current state of UAV (stabilizer_types.h)
+//		sensorDatat_t *sensorData - struct reflecting current sensor measurements (stabilizer_types.h)
+//		control_t *control - struct reflecting current positional control inputs (roll, pitch, yaw, thrust) (stabilizer_types.h)
+//		const uint32_t tick - unsigned int 
+// Return Type: void
 
 static bool latestTofMeasurement(tofMeasurement_t* tofMeasurement) {
   return xQueuePeek(tofDataQueue, tofMeasurement, 0) == pdTRUE;

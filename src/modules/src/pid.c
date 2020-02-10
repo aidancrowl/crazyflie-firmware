@@ -62,28 +62,28 @@ float pidUpdate(PidObject* pid, const float measured, const bool updateError)
 
     if (updateError)
     {
-        pid->error = pid->desired - measured; //new error = desired - measured
+        pid->error = pid->desired - measured; // new error = desired - measured
     }
 
-    pid->outP = pid->kp * pid->error; //proportional output = kp * error
+    pid->outP = pid->kp * pid->error; // proportional output = kp * error
     output += pid->outP;
 
-    //set derivative by checking if we want to filter it and make sure it is a #
-    float deriv = (pid->error - pid->prevError) / pid->dt; //derivative = current error - previous error /change in time (slope of error over time)
+    // set derivative by checking if we want to filter it and make sure it is a #
+    float deriv = (pid->error - pid->prevError) / pid->dt; // derivative = (current error - previous error) /change in time (slope of error over time)
     if (pid->enableDFilter)
     {
-      pid->deriv = lpf2pApply(&pid->dFilter, deriv); //calculates a delay element & checks to make sure it is finite so bad values don't go through filter
-    } else {                                         //if yes sets delay element to derivative and returns it
+      pid->deriv = lpf2pApply(&pid->dFilter, deriv); // calculates a delay element & checks to make sure it is finite so bad values don't go through filter
+    } else {                                         // if yes sets delay element to derivative and returns it
       pid->deriv = deriv;
     }
     if (isnan(pid->deriv)) {
       pid->deriv = 0;
     }
-    pid->outD = pid->kd * pid->deriv;  //derivative output = kd * derivative
+    pid->outD = pid->kd * pid->deriv;  // derivative output = kd * derivative
     output += pid->outD;
 
 
-    //compute integral value (proportional to error and duration of error)
+    // compute integral value (proportional to error and duration of error)
     pid->integ += pid->error * pid->dt;
 
     // Constrain the integral (unless the iLimit is zero)
@@ -110,7 +110,6 @@ float pidUpdate(PidObject* pid, const float measured, const bool updateError)
 void pidSetIntegralLimit(PidObject* pid, const float limit) {
     pid->iLimit = limit;
 }
-
 
 void pidReset(PidObject* pid)
 {

@@ -63,7 +63,7 @@ static EstimatorFcns estimatorFunctions[] = {
         .estimatorEnqueueFlow = NOT_IMPLEMENTED,
         .estimatorEnqueueYawError = NOT_IMPLEMENTED,
         .estimatorEnqueueSweepAngles = NOT_IMPLEMENTED,
-    }, // Complementary estimator (I believe this is the one included with the original Crazyflie firmware?)
+    }, // Complementary estimator
     {
         .init = estimatorKalmanInit,
         .deinit = NOT_IMPLEMENTED,

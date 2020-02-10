@@ -41,10 +41,10 @@ struct pidInit_s {
 };
 
 struct pidAxis_s {
-  PidObject pid;
+  PidObject pid; // defined in pid.h, sets relevant values for pid control
 
   struct pidInit_s init;
-    stab_mode_t previousMode;
+  stab_mode_t previousMode; // enum defined in stabilizer_types.h (modeDisable = 0, modeAbs, modeVelocity)
   float setpoint;
 
   float output;
@@ -63,7 +63,7 @@ struct this_s {
   uint16_t thrustMin;  // Minimum thrust value to output
 };
 
-// Maximum roll/pitch angle permited
+// Maximum roll/pitch angle permitted
 static float rpLimit  = 20;
 static float rpLimitOverhead = 1.10f;
 // Velocity maximums
@@ -72,7 +72,7 @@ static float zVelMax  = 1.0f;
 static float velMaxOverhead = 1.10f;
 static const float thrustScale = 1000.0f;
 
-#define DT (float)(1.0f/POSITION_RATE)
+#define DT (float)(1.0f/POSITION_RATE) // POSITION_RATE defined in stabilizer_types.h
 #define POSITION_LPF_CUTOFF_FREQ 20.0f
 #define POSITION_LPF_ENABLE true
 
@@ -161,8 +161,7 @@ static float runPid(float input, struct pidAxis_s *axis, float setpoint, float d
   return pidUpdate(&axis->pid, input, true);
 }
 
-void positionController(float* thrust, attitude_t *attitude, setpoint_t *setpoint,
-                                                             const state_t *state)
+void positionController(float* thrust, attitude_t *attitude, setpoint_t *setpoint, const state_t *state)
 {
   this.pidX.pid.outputLimit = xyVelMax * velMaxOverhead;
   this.pidY.pid.outputLimit = xyVelMax * velMaxOverhead;
@@ -170,20 +169,20 @@ void positionController(float* thrust, attitude_t *attitude, setpoint_t *setpoin
   // this value is below 0.5
   this.pidZ.pid.outputLimit = fmaxf(zVelMax, 0.5f)  * velMaxOverhead;
 
-  float cosyaw = cosf(state->attitude.yaw * (float)M_PI / 180.0f);
-  float sinyaw = sinf(state->attitude.yaw * (float)M_PI / 180.0f);
+  float cosyaw = cosf(state->attitude.yaw * (float)M_PI / 180.0f); // in radians
+  float sinyaw = sinf(state->attitude.yaw * (float)M_PI / 180.0f); // in radians
   float bodyvx = setpoint->velocity.x;
   float bodyvy = setpoint->velocity.y;
 
   // X, Y
   if (setpoint->mode.x == modeAbs) {
     setpoint->velocity.x = runPid(state->position.x, &this.pidX, setpoint->position.x, DT);
-  } else if (setpoint->velocity_body) {
+  } else if (setpoint->velocity_body) { // if velocity is given in body frame
     setpoint->velocity.x = bodyvx * cosyaw - bodyvy * sinyaw;
   }
   if (setpoint->mode.y == modeAbs) {
     setpoint->velocity.y = runPid(state->position.y, &this.pidY, setpoint->position.y, DT);
-  } else if (setpoint->velocity_body) {
+  } else if (setpoint->velocity_body) { // if velocity is given in body frame
     setpoint->velocity.y = bodyvy * cosyaw + bodyvx * sinyaw;
   }
   if (setpoint->mode.z == modeAbs) {
@@ -193,14 +192,13 @@ void positionController(float* thrust, attitude_t *attitude, setpoint_t *setpoin
   velocityController(thrust, attitude, setpoint, state);
 }
 
-void velocityController(float* thrust, attitude_t *attitude, setpoint_t *setpoint,
-                                                             const state_t *state)
+void velocityController(float* thrust, attitude_t *attitude, setpoint_t *setpoint, const state_t *state)
 {
   this.pidVX.pid.outputLimit = rpLimit * rpLimitOverhead;
   this.pidVY.pid.outputLimit = rpLimit * rpLimitOverhead;
   // Set the output limit to the maximum thrust range
   this.pidVZ.pid.outputLimit = (UINT16_MAX / 2 / thrustScale);
-  //this.pidVZ.pid.outputLimit = (this.thrustBase - this.thrustMin) / thrustScale;
+  // this.pidVZ.pid.outputLimit = (this.thrustBase - this.thrustMin) / thrustScale;
 
   // Roll and Pitch
   float rollRaw  = runPid(state->velocity.x, &this.pidVX, setpoint->velocity.x, DT);
